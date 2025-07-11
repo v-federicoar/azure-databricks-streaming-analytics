@@ -14,7 +14,7 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 
 1. Clone, fork, or download this GitHub repository.
 
-2. Install [Docker](https://www.docker.com/) to run the data generator.
+2. Install [Docker](https://www.docker.com/) to run the data generator and generate jar for the databricks job.
 
 3. Install [Azure CLI 2.7.1](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest).
 
