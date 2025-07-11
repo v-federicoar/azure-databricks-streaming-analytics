@@ -1,0 +1,29 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "onprem", "onprem", "{30FABD86-4D1A-A4EA-2A97-E99000B7CB07}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "taxi", "onprem\DataLoader\taxi.csproj", "{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{FBC65CCC-CAA8-957C-BB9B-8640CFD5C802} = {30FABD86-4D1A-A4EA-2A97-E99000B7CB07}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5666D200-083C-44A0-9E33-59A3C3C5BACA}
+	EndGlobalSection
+EndGlobal
