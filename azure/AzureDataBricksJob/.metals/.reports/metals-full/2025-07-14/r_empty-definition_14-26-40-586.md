@@ -1,11 +1,19 @@
+error id: file:///C:/repositories/azure-databricks-streaming-analytics/azure/AzureDataBricksJob/src/test/scala/org/apache/spark/sql/streaming/UtilsTests.scala:`<none>`.
+file:///C:/repositories/azure-databricks-streaming-analytics/azure/AzureDataBricksJob/src/test/scala/org/apache/spark/sql/streaming/UtilsTests.scala
+empty definition using pc, found symbol in pc: `<none>`.
+empty definition using semanticdb
+empty definition using fallback
+non-local guesses:
+	 -SourceProgress#
+	 -scala/Predef.SourceProgress#
+offset: 711
+uri: file:///C:/repositories/azure-databricks-streaming-analytics/azure/AzureDataBricksJob/src/test/scala/org/apache/spark/sql/streaming/UtilsTests.scala
+text:
+```scala
 package org.apache.spark.sql.streaming
 
 import java.util.HashMap
 import java.util.UUID.randomUUID
-
-import java.util.Collections
-
-import scala.collection.JavaConverters._
 
 import com.microsoft.pnp.{SparkSuiteBase, Utils}
 import org.apache.spark.sql.streaming.StreamingQueryListener.QueryProgressEvent
@@ -20,18 +28,7 @@ class UtilsTests[sql] extends SparkSuiteBase with Matchers {
 
     duration.put("addBatch", 100L)
     duration.put("getBatch", 200L)
-   
-    val source: SourceProgress = new SourceProgress(
-      "source", // description
-      "start", // startOffset
-      "end", // endOffset
-      "latest",// latestOffset
-      100L, // numInputRows
-      200.0,// inputRowsPerSecond
-      300.0, // processedRowsPerSecond
-      Map.empty[String, String].asJava // metrics
-    )
-
+    val source: SourceProgress = new SourceProgress@@("source", "start", "end", 100, 200, 300)
     val sourcearr = new Array[SourceProgress](1)
     sourcearr(0) = source
 
@@ -57,3 +54,9 @@ class UtilsTests[sql] extends SparkSuiteBase with Matchers {
 
   }
 }
+```
+
+
+#### Short summary: 
+
+empty definition using pc, found symbol in pc: `<none>`.

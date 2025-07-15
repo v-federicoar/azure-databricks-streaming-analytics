@@ -1,4 +1,9 @@
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 as build
+
+# Fix for Debian Buster EOL: use archive mirrors
+RUN sed -i 's|http://deb.debian.org/debian|http://archive.debian.org/debian|g' /etc/apt/sources.list && \
+    sed -i 's|http://security.debian.org/debian-security|http://archive.debian.org/debian-security|g' /etc/apt/sources.list
+
 RUN apt-get update
 RUN apt-get install -y git
 RUN git clone --recursive https://github.com/mspnp/azure-databricks-streaming-analytics.git  &&  cd azure-databricks-streaming-analytics && git fetch && git checkout master
