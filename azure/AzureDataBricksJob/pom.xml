@@ -47,24 +47,24 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.43.v20210629</version>
+            <version>12.0.15</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.databricks</groupId>
             <artifactId>dbutils-api_${scala.compat.version}</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.rogach</groupId>
             <artifactId>scallop_${scala.compat.version}</artifactId>
-            <version>3.5.1</version>
+            <version>5.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.datastax.spark</groupId>
             <artifactId>spark-cassandra-connector_${scala.compat.version}</artifactId>
-            <version>3.0.1</version>
+            <version>3.5.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -86,6 +86,7 @@
             <plugin>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest-maven-plugin</artifactId>
+                <version>2.2.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

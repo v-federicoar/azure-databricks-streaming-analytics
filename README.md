@@ -1,8 +1,8 @@
 # Stream processing with Azure Databricks
 
-This reference architecture shows an end-to-end [stream processing](https://docs.microsoft.com/azure/architecture/data-guide/big-data/real-time-processing) pipeline. This type of pipeline has four stages: ingest, process, store, and analysis and reporting. For this reference architecture, the pipeline ingests data from two sources, performs a join on related records from each stream, enriches the result, and calculates an average in real time. The results are stored for further analysis.
+This reference architecture shows an end-to-end [stream processing](https://learn.microsoft.com/azure/architecture/reference-architectures/data/stream-processing-databricks) pipeline. This type of pipeline has four stages: ingest, process, store, and analysis and reporting. For this reference architecture, the pipeline ingests data from two sources, performs a join on related records from each stream, enriches the result, and calculates an average in real time. The results are stored for further analysis.
 
-![](https://github.com/mspnp/architecture-center/blob/master/docs/reference-architectures/data/images/stream-processing-databricks.png)
+![](https://learn.microsoft.com/azure/architecture/reference-architectures/data/images/stream-processing-databricks.svg)
 
 **Scenario**: A taxi company collects data about each taxi trip. For this scenario, we assume there are two separate devices sending data. The taxi has a meter that sends information about each ride &mdash; the duration, distance, and pickup and dropoff locations. A separate device accepts payments from customers and sends data about fares. To spot ridership trends, the taxi company wants to calculate the average tip per mile driven, in real time, for each neighborhood.
 
@@ -16,9 +16,9 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 
 2. Install [Docker](https://www.docker.com/) to run the data generator and generate jar for the databricks job.
 
-3. Install [Azure CLI 2.7.1](https://docs.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest).
+3. Install [Azure CLI 2.71.0](https://learn.microsoft.com/cli/azure/install-azure-cli?view=azure-cli-latest).
 
-4. Install [Databricks CLI 0.258.0](https://docs.microsoft.com/azure/databricks/dev-tools/cli/).
+4. Install [Databricks CLI 0.258.0](https://learn.microsoft.com/azure/databricks/dev-tools/cli/).
 
 5. From a command prompt, bash prompt, or PowerShell prompt, sign into your Azure account as follows:
 
@@ -29,7 +29,7 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 6. Optional - Install a Java IDE, with the following resources:
     - JDK 1.8
     - Scala SDK 2.12
-    - Spark 3.0.1
+    - Spark 3.5.2
     - Maven 3.6.3
     > Note: Instructions are included for building via a docker container if you do not want to install a Java IDE.
 
@@ -58,9 +58,11 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 
 5. Open a web browser and navigate to <https://www.census.gov/geographies/mapping-files/time-series/geo/cartographic-boundary.html#ti1400387013>.
 
-6. Under the section **County Subdivisions** click the dropdown an select **New York**.
+6. Select 2019
 
-7. Copy the **cb_2019_36_cousub_500k.zip** file from your browser's **downloads** directory to the `DataFile` directory.
+7. Under the section **County Subdivisions** click the shapefile dropdown an select **New York**.
+
+8. Copy the **cb_2019_36_cousub_500k.zip** file from your browser's **downloads** directory to the `DataFile` directory.
 
 ### Deploy the Azure resources
 
@@ -79,67 +81,47 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 3. Run the following commands to deploy the Azure resources:
 
     ```bash
-    export resourceGroup='[Resource group name]'
-    export resourceLocation='[Region]'
-    export eventHubNamespace='[Event Hubs namespace name]'
-    export databricksWorkspaceName='[Azure Databricks workspace name]'
-    export cosmosDatabaseAccount='[Cosmos DB database name]'
-    export logAnalyticsWorkspaceName='[Log Analytics workspace name]'
-    export logAnalyticsWorkspaceRegion='[Log Analytics region]'
-
     # Create a resource group
-    az group create --name $resourceGroup --location $resourceLocation
+    az group create --name rg-databricks-streaming-centralus --location centralus
 
     # Deploy resources
-    az deployment group create --resource-group $resourceGroup \
-     --template-file ./deployresources.json --parameters \
-     eventHubNamespace=$eventHubNamespace \
-        databricksWorkspaceName=$databricksWorkspaceName \
-     cosmosDatabaseAccount=$cosmosDatabaseAccount \
-     logAnalyticsWorkspaceName=$logAnalyticsWorkspaceName \
-     logAnalyticsWorkspaceRegion=$logAnalyticsWorkspaceRegion
+    az deployment group create -g rg-databricks-streaming-centralus --template-file ./main.bicep
+
     ```
 
 4. The output of the deployment is written to the console once complete. Search the output for the following JSON:
 
 ```JSON
 "outputs": {
-        "cosmosDb": {
-          "type": "Object",
-          "value": {
-            "hostName": <value>,
-            "secret": <value>,
-            "username": <value>
-          }
-        },
-        "eventHubs": {
-          "type": "Object",
-          "value": {
-            "taxi-fare-eh": <value>,
-            "taxi-ride-eh": <value>
-          }
-        },
-        "logAnalytics": {
-          "type": "Object",
-          "value": {
-            "secret": <value>,
-            "workspaceId": <value>
-          }
+      "cosmosDb": {
+        "type": "Object",
+        "value": {
+          "hostName":  <value>,
+          "secret":  <value>,
+          "username":  <value>,
         }
-},
+      },
+      "eventHubs": {
+        "type": "Object",
+        "value": {
+          "fare":  <value>,
+          "ride":  <value>,
+        }
+      }
+    }
 ```
 
 These values are the secrets that will be added to Databricks secrets in upcoming sections. Keep them secure until you add them in those sections.
 
 ### Add a Cassandra table to the Cosmos DB Account
 
-1. In the Azure portal, navigate to the resource group created in the **deploy the Azure resources** section above. Click on **Azure Cosmos DB Account**. Create a table with the Cassandra API.
+1. In the Azure portal, navigate to the resource group created. Click on **Azure Cosmos DB Account**.
 
 2. In the **overview** blade, click **add table**.
 
-3. When the **add table** blade opens, enter `newyorktaxi` in the **Keyspace name** text box.
+3. When the **add table** blade opens, enter `newyorktaxi` in the **Type a new keyspace id** text box.
 
-4. In the **enter CQL command to create the table** section, enter `neighborhoodstats` in the text box beside `newyorktaxi`.
+4. In the **enter CQL command to create the table** section, enter `neighborhoodstats` as the table name in the text box beside `newyorktaxi`.
 
 5. In the text box below, enter the following:
 
@@ -147,9 +129,9 @@ These values are the secrets that will be added to Databricks secrets in upcomin
     (neighborhood text, window_end timestamp, number_of_rides bigint, total_fare_amount double, total_tip_amount double, average_fare_amount double, average_tip_amount double, primary key(neighborhood, window_end))
     ```
 
-6. In the **Table throughput** section confirm that `Autoscale` is selected and that value `4000` is in the **Table Max RU/s** text box.
+6. In the **Table throughput** section, for throughput configuration, confirm that `Autoscale` is selected and that the value `4000` is entered in the **Table Max RU/s** text box.
 
-7. Click **OK**.
+7. Click **OK** to complete the table creation process.
 
 ### Add the Databricks secrets using the Databricks CLI
 

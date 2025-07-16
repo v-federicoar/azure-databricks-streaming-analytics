@@ -9,10 +9,14 @@ import java.util.Optional;
 public class MDCCloseableFactory {
     private class MDCCloseable implements AutoCloseable {
         public MDCCloseable(Map<String, Object> mdc) {
-            // Log4j supports Map<String, Object>, but slf4j wants Map<String, String>
-            // Because of type erasure, this should be okay, but we can try to find a
-            // way to fix the warnings later.
-            MDC.setContextMap((Map)mdc);
+            // Convert Map<String, Object> to Map<String, String>
+            Map<String, String> stringMdc = new HashMap<>();
+            for (Map.Entry<String, Object> entry : mdc.entrySet()) {
+                if (entry.getValue() != null) {
+                 stringMdc.put(entry.getKey(), entry.getValue().toString());
+                }
+            }
+            MDC.setContextMap(stringMdc);
         }
 
         @Override
@@ -21,7 +25,7 @@ public class MDCCloseableFactory {
         }
     }
 
-    private Optional<Map<String, Object>> context;
+    private final Optional<Map<String, Object>> context;
 
     public MDCCloseableFactory() {
         this(null);
@@ -32,9 +36,8 @@ public class MDCCloseableFactory {
     }
 
     public AutoCloseable create(Map<String, Object> mdc) {
-        // Values in mdc will override context
         Map<String, Object> newMDC = new HashMap<>();
-        this.context.ifPresent(c -> newMDC.putAll(c));
+        this.context.ifPresent(newMDC::putAll);
         newMDC.putAll(mdc);
         return new MDCCloseable(newMDC);
     }
