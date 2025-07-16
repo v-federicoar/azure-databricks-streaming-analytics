@@ -113,27 +113,9 @@ A deployment for this reference architecture is available on [GitHub](https://gi
 
 These values are the secrets that will be added to Databricks secrets in upcoming sections. Keep them secure until you add them in those sections.
 
-### Add a Cassandra table to the Cosmos DB Account
-
-1. In the Azure portal, navigate to the resource group created. Click on **Azure Cosmos DB Account**.
-
-2. In the **overview** blade, click **add table**.
-
-3. When the **add table** blade opens, enter `newyorktaxi` in the **Type a new keyspace id** text box.
-
-4. In the **enter CQL command to create the table** section, enter `neighborhoodstats` as the table name in the text box beside `newyorktaxi`.
-
-5. In the text box below, enter the following:
-
-    ```shell
-    (neighborhood text, window_end timestamp, number_of_rides bigint, total_fare_amount double, total_tip_amount double, average_fare_amount double, average_tip_amount double, primary key(neighborhood, window_end))
-    ```
-
-6. In the **Table throughput** section, for throughput configuration, confirm that `Autoscale` is selected and that the value `4000` is entered in the **Table Max RU/s** text box.
-
-7. Click **OK** to complete the table creation process.
-
 ### Add the Databricks secrets using the Databricks CLI
+
+In the Azure portal, open the Databricks workspace resource, then on the Overview page, copy the Workspace URL value (this is needed for Databricks CLI configuration).
 
 > Tip: Make sure you have authenticated your Databricks CLI configuration.  The simplest method in bash is to run:
 >
@@ -141,15 +123,14 @@ These values are the secrets that will be added to Databricks secrets in upcomin
 >  export DATABRICKS_AAD_TOKEN=$(az account get-access-token --resource 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d | jq .accessToken --raw-output)
 >  echo $DATABRICKS_AAD_TOKEN
 >  databricks configure --token
->  ## It will ask for databricks host first and the token later on. The databrick host is on databricks resource overview (URL value)
+>  ## You will be prompted for the Databricks host (Workspace URL) first, then the token. The Workspace URL can be found on the Databricks resource overview page in the Azure portal.
 > ```
 >
 > The resource GUID (2ff814a6-3304-4ab8-85cb-cd0e6f879c1d) is a fixed value. For other options see [Set up authentication](https://docs.microsoft.com/azure/databricks/dev-tools/cli/#--set-up-authentication) in the Azure Databricks documentation.
 > If you see a JSONDecodeError error when running a command, your token has exired and you can refresh by running the commands above again.
 
-First, enter the secrets for EventHub:
 
-1. Using the **Azure Databricks CLI** installed in step 4 of the prerequisites, create the Azure Databricks secret scope:
+1. Using the **Azure Databricks CLI** installed, create the Azure Databricks secret scope:
 
     ```bash
     databricks secrets create-scope "azure-databricks-job"
@@ -161,7 +142,7 @@ First, enter the secrets for EventHub:
     databricks secrets put-secret  "azure-databricks-job" "taxi-ride"
     ```
 
-    Enter the **taxi-ride-eh** value from the **eventHubs** output section in step 4 of the *deploy the Azure resources* section.
+    Enter the **ride** value from the **eventHubs** output of the *deploy the Azure resources* section.
 
 3. Add the secret for the taxi fare EventHub:
 
@@ -169,7 +150,7 @@ First, enter the secrets for EventHub:
     databricks secrets put-secret "azure-databricks-job" "taxi-fare"
     ```
 
-    Enter the **taxi-fare-eh** value from the **eventHubs** output section in step 4 of the *deploy the Azure resources* section.
+    Enter the **fare** value from the **eventHubs** of the *deploy the Azure resources* section.
 
 Next, enter the secrets for Cosmos DB:
 
@@ -179,7 +160,7 @@ Next, enter the secrets for Cosmos DB:
     databricks secrets put-secret "azure-databricks-job" "cassandra-username"
     ```
 
-   Enter the **username** value from the **CosmosDb** output section in step 4 of the *deploy the Azure resources* section.
+   Enter the **username** value from the **CosmosDb** output of the *deploy the Azure resources* section.
 
 2. Next, add the secret for the Cosmos DB password:
 
@@ -187,7 +168,7 @@ Next, enter the secrets for Cosmos DB:
     databricks secrets put-secret azure-databricks-job "cassandra-password"
     ```
 
-   Enter the **secret** value from the **CosmosDb** output section in step 4 of the *deploy the Azure resources* section.
+   Enter the **secret** value from the **CosmosDb** output of the *deploy the Azure resources* section.
 
     > Note: If using an [Azure Key Vault-backed secret scope](https://docs.azuredatabricks.net/user-guide/secrets/secret-scopes.html#azure-key-vault-backed-scopes), the scope must be named **azure-databricks-job** and the secrets must have the exact same names as those above.
 
@@ -203,7 +184,7 @@ Next, enter the secrets for Cosmos DB:
 
     ```bash
     cd ../DataFile
-    databricks fs cp cb_2024_36_cousub_500k.zip dbfs:/azure-databricks-job/
+    databricks fs cp cb_2019_36_cousub_500k.zip dbfs:/azure-databricks-job/
     cd ..
     ```
 
@@ -214,31 +195,30 @@ Next, enter the secrets for Cosmos DB:
 1. To build the jars using a docker container from a bash prompt change to the **azure** directory and run:
 
     ```bash
+    cd azure
     docker run -it --rm -v `pwd`:/streaming_azuredatabricks_azure -v ~/.m2:/root/.m2 maven:3.6.3-jdk-8 mvn -f /streaming_azuredatabricks_azure/pom.xml package
+    cd ..
     ```
 
     > Note: Alternately, use your Java IDE to import the Maven project file named **pom.xml** located in the **azure** directory. Perform a clean build.
 
-1. The outputs of the build is a file named **azure-databricks-job-1.0-SNAPSHOT.jar** in the **./AzureDataBricksJob/target** directory.
+1. The output of the build is a file named **azure-databricks-job-1.0-SNAPSHOT.jar** in the **./AzureDataBricksJob/target** directory.
 
 ### Create a Databricks cluster
-!!! review the UI changed
 
-1. In the Databricks workspace, click **Compute**, then click **Create cluster**. Enter the cluster name you created in step 3 of the **configure custom logging for the Databricks job** section above.
+1. Navigate to the Databricks resource and select **Launch Workpace**
 
-1. Select **Standard** for **Cluster Mode**.
+1. In the Databricks workspace, click **Compute**, then click **Create cluster**. Enter the cluster name.
 
-1. Set **Databricks runtime version** to **7.3 Extended Support (Scala 2.12, Apache Spark 3.0.1)**
-//not longer exist 3.0.1 and the current code doesn't work on the available clusters
+1. Set **Databricks runtime version** to **16.4 LTS Extended Support (Scala 2.12, Apache Spark 3.5.2)**
 
 1. Deselect **Enable autoscaling**.
 
 1. Set **Worker Type** to **Standard_DS3_v2**.
 
 1. Set **Workers** to **2**.
-// we could use single node as demo, for cost.
 
-1. Set **Driver Type** to **Same as worker**
+1. Click **Create**
 
    #### Optional - Configure Azure Log Analytics
    //not tested

@@ -3,7 +3,7 @@ targetScope = 'resourceGroup'
 param eventHubNamespaceName string = 'evhns-streaming'
 param databricksWorkspaceName string = 'dbw-streaming'
 param cosmosDatabaseAccountName string = 'coscas-streaming'
-param logAnalyticsWorkspaceName string = 'lo-streaming'
+param logAnalyticsWorkspaceName string = 'log-streaming'
 param logAnalyticsWorkspaceRegion string = resourceGroup().location
 param location string = resourceGroup().location
 
@@ -83,22 +83,6 @@ resource eventHubDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
         category: 'OperationalLogs'
         enabled: true
       }
-      {
-        category: 'AutoInflateLogs'
-        enabled: true
-      }
-      {
-        category: 'KafkaCoordinatorLogs'
-        enabled: true
-      }
-      {
-        category: 'KafkaUserErrorLogs'
-        enabled: true
-      }
-      {
-        category: 'KafkaBrokerLogs'
-        enabled: true
-      }
     ]
     metrics: [
       {
@@ -147,12 +131,6 @@ resource databricksDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
         enabled: true
       }
     ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-      }
-    ]
   }
 }
 
@@ -176,6 +154,48 @@ resource cosmosDatabaseAccount 'Microsoft.DocumentDB/databaseAccounts@2025-04-15
         name: 'EnableCassandra'
       }
     ]
+  }
+  resource cassandraKeyspace 'cassandraKeyspaces@2025-04-15' = {
+    name: 'newyorktaxi'
+    location: location
+    properties: {
+      resource: {
+        id: 'newyorktaxi'
+      }
+    }
+    // Create Cassandra Table
+    resource cassandraTable 'tables@2025-04-15' = {
+      name: 'neighborhoodstats'
+      location: location
+      properties: {
+        options: {
+          throughput: 4000
+        }
+        resource: {
+          id: 'neighborhoodstats'
+          schema: {
+            clusterKeys: [
+              {
+                name: 'window_end'
+                orderBy: 'Asc'
+              }
+            ]
+            columns: [
+              { name: 'neighborhood', type: 'text' }
+              { name: 'window_end', type: 'timestamp' }
+              { name: 'number_of_rides', type: 'bigint' }
+              { name: 'total_fare_amount', type: 'double' }
+              { name: 'total_tip_amount', type: 'double' }
+              { name: 'average_fare_amount', type: 'double' }
+              { name: 'average_tip_amount', type: 'double' }
+            ]
+            partitionKeys: [
+              { name: 'neighborhood' }
+            ]
+          }
+        }
+      }
+    }
   }
 }
 
@@ -202,12 +222,6 @@ resource cosmosDbDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
         enabled: true
       }
     ]
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-      }
-    ]
   }
 }
 
@@ -221,4 +235,3 @@ output eventHubs object = {
   ride: eventHubNamespace::eventHubsResourcesRide::eventHubsAuthorizationRuleRide.listKeys().primaryConnectionString
   fare: eventHubNamespace::eventHubsResourcesFare::eventHubsAuthorizationRuleFare.listKeys().primaryConnectionString
 }
-
