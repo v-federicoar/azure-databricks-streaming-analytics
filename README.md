@@ -237,61 +237,56 @@ Next, enter the secrets for Cosmos DB:
 
 1. In the Databricks user interface, click on the **home** button.
 
-2. Click on **Compute** in the navigtation menu on the left then click on the cluster you created in the **Create a Databricks cluster** step.
+2. Click on **Compute** in the navigation menu on the left then click on the cluster you created in the **Create a Databricks cluster** step.
 
 3. Click on **Libraries**, then click **Install New**.
 
 4. In the **Library Source** control, select **Maven**.
 
-5. Under the **Maven Coordinates** text box, enter `com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.21`.
+5. Under the **Maven Coordinates** text box, enter `com.microsoft.azure:azure-eventhubs-spark_2.12:2.3.22`.
 
 6. Select **Install**.
 
-8. Repeat steps 3 - 6 for the `com.datastax.spark:spark-cassandra-connector-assembly_2.12:3.0.1` Maven coordinate.
+7. Repeat steps 3 - 6 for the `com.datastax.spark:spark-cassandra-connector-assembly_2.12:3.5.1` Maven coordinate.
 
-9. Repeat steps 3 - 5 for the `org.geotools:gt-shapefile:23.0` Maven coordinate.
+8. Repeat steps 3 - 5 for the `org.geotools:gt-shapefile:23.0` Maven coordinate.
 
-10. Enter `https://repo.osgeo.org/repository/release/` in the **Repository** text box.
+9. For the `org.geotools:gt-shapefile:23.0` dependency, enter `https://repo.osgeo.org/repository/release/` in the **Repository** text box.
 
-11. Click **Install**.
+10. Click **Install**.
 
 ### Create a Databricks job
 
-1. Copy the **azure-databricks-job-1.0-SNAPSHOT.jar** file to the Databricks file system by entering the following command in the **Databricks CLI**:
-
-    ```bash
-    databricks fs cp --overwrite AzureDataBricksJob/target/azure-databricks-job-1.0-SNAPSHOT.jar dbfs:/azure-databricks-job/
-    ```
-
-1. In the Databricks workspace, click "Jobs", "create job".
+1. In the Databricks workspace, click "Jobs & Pipelines", then "Create job".
 
 1. Enter a job name.
 
 1. In the **Task** area, change **Type** to `JAR` and Enter `com.microsoft.pnp.TaxiCabReader` in the **Main Class** field.
 
+1. Under Cluster, select your created cluster
+
 1. Under **Dependent Libraries** click **Add**, this opens the **Add dependent library** dialog box.
 
-1. Change **Library Source** to **DBFS/ADLS**, confirm that Library Type is **Jar** and enter `dbfs:/azure-databricks-job/azure-databricks-job-1.0-SNAPSHOT.jar` in the **File Path** text box and select **Add**.
-// this doesn't work in the new clusters... I uploaded in the workpace... we will need to figure out how to do it
+1. Change **Library Source** to **Workspace**, upload **azure-databricks-job-1.0-SNAPSHOT.jar** generated
 
-1. In the **Parameters** field, enter the following (replace **\<Cosmos DB Cassandra host name\>** with a value from above):
+1. In the **Parameters** field, enter the following (replace **\<Cosmos DB Cassandra host name\>** with a value from above output):
 
     ```shell
-    ["-n","jar:file:/dbfs/azure-databricks-job/cb_2020_36_cousub_500k.zip!/cb_2020_36_cousub_500k.shp","--taxi-ride-consumer-group","taxi-ride-eh-cg","--taxi-fare-consumer-group","taxi-fare-eh-cg","--window-interval","1 hour","--cassandra-host","<Cosmos DB Cassandra host name>"]
+    ["-n","jar:file:/dbfs/azure-databricks-job/cb_2019_36_cousub_500k.zip!/cb_2019_36_cousub_500k.shp","--taxi-ride-consumer-group","taxi-ride-eh-cg","--taxi-fare-consumer-group","taxi-fare-eh-cg","--window-interval","1 hour","--cassandra-host","<Cosmos DB Cassandra host name>"]
     ```
 
 1. Under **Cluster**, click the drop down arrow and select the cluster created the **Create a Databricks cluster** section.
 
-1. Click Create
+1. Click Create Task
 
-1. Select the **Runs** tab and click **Run Now**.
+1. Click **Run Now**.
 
 ### Run the data generator
 
 1. Navigate to the directory `onprem` in the GitHub repository.
 
     ```bash
-    cd ../onprem
+    cd ./onprem
     ```
 
 1. Update the values in the file **main.env** as follows:
@@ -304,7 +299,7 @@ Next, enter the secrets for Cosmos DB:
     PUSH_RIDE_DATA_FIRST=false
     ```
 
-    The connection string for the taxi-ride event hub is the **taxi-ride-eh** value from the **eventHubs** output section in step 4 of the *deploy the Azure resources* section. The connection string for the taxi-fare event hub the **taxi-fare-eh** value from the **eventHubs** output section in step 4 of the *deploy the Azure resources* section.
+    The connection string for the taxi-ride event hub is the **ride** value from the **eventHubs** output of the *deploy the Azure resources* section. The connection string for the taxi-fare event hub is the **fare** value from the **eventHubs** output of the *deploy the Azure resources* section.
 
 1. Run the following command to build the Docker image.
 
