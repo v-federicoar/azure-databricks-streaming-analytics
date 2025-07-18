@@ -216,22 +216,9 @@ Next, enter the secrets for Cosmos DB:
 
 1. Set **Worker Type** to **Standard_DS3_v2**.
 
-1. Set **Workers** to **2**.
+1. Select Single Node, it is enough for testing purpose 
 
 1. Click **Create**
-
-   #### Optional - Configure Azure Log Analytics
-   //not tested
-
-   1. Follow the instructions in [Monitoring Azure Databricks](https://github.com/mspnp/spark-monitoring) to build the monitoring library and upload the resulting library files to your workspace.
-
-   1. Click on **Advanced Options** then **Init Scripts**.
-
-   1. Enter **dbfs:/databricks/spark-monitoring/spark-monitoring.sh**.
-
-   1. Click the **Add** button.
-
-1. Click the **Create Cluster** button.
 
 ### Install dependent libraries on cluster
 
@@ -334,6 +321,18 @@ Next, enter the secrets for Cosmos DB:
 
 ### Verify the solution is running
 
+#### Check Job execution
+
+Navigate to Databricks Workspace, then select Compute and click on the already created compute.  
+In the SparkUI tab, select Jobs subTab.  
+Visualize Event Timeline, you will see something like with tons of succeeded executions:
+
+![](./images/SuccededJobs.png)
+
+#### Check database data
+
+!!  So far is running success with all the updates, but data is not arriving to the database. It must be needed to work on that.
+
 To verify the Databricks job is running correctly, open the Azure portal and navigate to the Cosmos DB database. Open the **Data Explorer** blade and examine the data in the **neighborhoodstats** table, you should see results similar to:
 
 | average_fare _amount | average_tip _amount | neighborhood | number_of_rides | total_fare _amount | total_tip _amount | window_end |
@@ -344,3 +343,22 @@ To verify the Databricks job is running correctly, open the Azure portal and nav
 | ... | ... | ... | ... | ... | ... | ... |
 
 > [1] Donovan, Brian; Work, Dan (2016): New York City Taxi Trip Data (2010-2013). University of Illinois at Urbana-Champaign. <https://doi.org/10.13012/J8PN93H8>
+
+
+## Clean Up
+
+Once you're done testing or demonstrating the solution, you can remove all deployed resources to avoid unnecessary costs and maintain a clean environment.
+
+```bash
+az group delete -n rg-databricks-streaming-centralus  -y
+```
+
+## Microsoft Open Source Code of Conduct
+
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
+
+Resources:
+
+- [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/)
+- [Microsoft Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/)
+- Contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with questions or concerns
